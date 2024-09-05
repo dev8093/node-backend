@@ -13,6 +13,11 @@ require('./db');
 const authRouter = require('./routes/auth');
 const postRouter = require('./routes/post');
 
+// cors: 
+const cors = require('cors')
+
+app.use(cors());
+
 app.use(express.json());
 app.use('/api/auth', authRouter);
 app.use('/api/post', postRouter);
