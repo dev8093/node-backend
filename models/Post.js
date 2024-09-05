@@ -8,6 +8,7 @@ const postSchema = new mongoose.Schema({
   image: {
     type: String,
   },
+  // isDeleted: boolean,
   // user_id :{
   //   type: String,
   // }

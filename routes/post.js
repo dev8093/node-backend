@@ -8,6 +8,27 @@ const Post = require('../models/Post');
 const isLoggedIn = require("../middlewares/isLoggedIn.js");
 const sendResponse = require('../utils/response');
 
+
+// get(), post(), update, delete
+
+
+postRouter.get("/all", isLoggedIn, async (req, res) => {
+    let user_id = req.user._id;
+
+    // find all post of the user 
+
+    let all_posts = await Post.find({user: user_id})
+    // .populate('user', 'name email')
+
+    if(!all_posts){
+        return sendResponse(res, false, 'No posts found', null,400);
+    }
+    return sendResponse(res, true, 'All posts', all_posts);
+})
+
+
+
+
 postRouter.post('/create', isLoggedIn, async (req, res) => {
      let{ text, image } = req.body;
      if(!text && !image){
@@ -73,9 +94,6 @@ postRouter.post("/update/:id", isLoggedIn, async (req, res) => {
 
        return sendResponse(res, true, 'Post updated successfully', updatedPost);
 
-
-
-
      }
 
      catch(err){
@@ -83,5 +101,33 @@ postRouter.post("/update/:id", isLoggedIn, async (req, res) => {
          return sendResponse(res, false, 'Server error', null,500);
      }
 })
+
+
+postRouter.delete("/delete/:id", isLoggedIn, async (req, res) => {
+       let post_id = req.params.id;
+       try{
+         let foundPost = await Post.findById(post_id);
+         if(!foundPost){
+             return sendResponse(res, false, 'Post not found', null,400);
+         }
+
+         if(String(req.user.id) !== String(foundPost.user)){
+                return sendResponse(res, false, 'You are not authorized to delete this post', null,400);
+         }
+
+         let deletedPost = await Post.findByIdAndDelete(post_id);
+
+         if(!deletedPost){
+             return sendResponse(res, false, 'Post not deleted', null,400);
+         }
+         
+        return sendResponse(res, true, 'Post deleted successfully', deletedPost);
+       }
+       catch(err){
+           console.log(err);
+           return sendResponse(res, false, 'Server error', null,500);
+       }
+})
+
 
 module.exports = postRouter;
